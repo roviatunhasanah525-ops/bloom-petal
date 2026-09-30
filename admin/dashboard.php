@@ -3,22 +3,60 @@
 require_once __DIR__ . '/../includes/admin_auth.php';
 require_once __DIR__ . '/../config/database.php';
 
-$stmt = $pdo->query("SELECT * FROM produk ORDER BY id DESC");
-$produk = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Menghitung jumlah produk
+$stmt = $pdo->query("SELECT COUNT(*) FROM produk");
+$total_produk = $stmt->fetchColumn();
+
+// Menghitung total stok
+$stmt = $pdo->query("SELECT COALESCE(SUM(stok), 0) FROM produk");
+$total_stok = $stmt->fetchColumn();
+
+// Menghitung jumlah kategori
+$stmt = $pdo->query("SELECT COUNT(DISTINCT kategori) FROM produk");
+$total_kategori = $stmt->fetchColumn();
+
+// Mengambil lima produk terbaru
+$stmt = $pdo->query(
+    "SELECT * FROM produk ORDER BY id DESC LIMIT 5"
+);
+$produk_terbaru = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="container">
-    <h1>Kelola Produk Bunga</h1>
-    <p>Kelola katalog bunga Bloom &amp; Petal di sini.</p>
+    <h1>Dashboard Admin</h1>
+
+    <p>
+        Selamat datang,
+        <?= htmlspecialchars($_SESSION['admin_nama'] ?? 'Admin') ?>!
+    </p>
 
     <?php require_once __DIR__ . '/../includes/flash.php'; ?>
 
     <p>
-        <a href="tambah.php" class="btn">+ Tambah Produk</a>
-        <a href="dashboard.php" class="btn">Kembali ke Dashboard</a>
+        <a href="produk.php" class="btn">Kelola Produk</a>
+        <a href="logout.php" class="btn">Logout</a>
     </p>
+
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <h3>Total Produk</h3>
+            <p><?= (int) $total_produk ?></p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Total Stok</h3>
+            <p><?= (int) $total_stok ?></p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Total Kategori</h3>
+            <p><?= (int) $total_kategori ?></p>
+        </div>
+    </div>
+
+    <h2>Produk Terbaru</h2>
 
     <div style="overflow-x:auto;">
         <table>
@@ -29,17 +67,16 @@ require_once __DIR__ . '/../includes/header.php';
                     <th>Kategori</th>
                     <th>Harga</th>
                     <th>Stok</th>
-                    <th>Aksi</th>
                 </tr>
             </thead>
 
             <tbody>
-                <?php if (empty($produk)): ?>
+                <?php if (empty($produk_terbaru)): ?>
                     <tr>
-                        <td colspan="6">Belum ada produk.</td>
+                        <td colspan="5">Belum ada produk.</td>
                     </tr>
                 <?php else: ?>
-                    <?php foreach ($produk as $i => $item): ?>
+                    <?php foreach ($produk_terbaru as $i => $item): ?>
                         <tr>
                             <td><?= $i + 1 ?></td>
                             <td><?= htmlspecialchars($item['nama']) ?></td>
@@ -51,21 +88,6 @@ require_once __DIR__ . '/../includes/header.php';
                                 ) ?>
                             </td>
                             <td><?= (int) $item['stok'] ?></td>
-                            <td>
-                                <a href="edit.php?id=<?= (int) $item['id'] ?>">
-                                    Edit
-                                </a>
-
-                                |
-
-                                <form action="hapus.php" method="POST"
-                                      style="display:inline;"
-                                      onsubmit="return confirm('Yakin ingin menghapus produk ini?')">
-                                    <input type="hidden" name="id"
-                                           value="<?= (int) $item['id'] ?>">
-                                    <button type="submit">Hapus</button>
-                                </form>
-                            </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>

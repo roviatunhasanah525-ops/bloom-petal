@@ -5,6 +5,7 @@ require_once __DIR__ . '/config/database.php';
 $pageTitle = 'Bloom & Petal | Toko Bunga';
 require_once __DIR__ . '/includes/header.php';
 
+// Mengambil 3 produk terbaru
 $stmt = $pdo->query(
     "SELECT id, nama, kategori, harga, gambar
      FROM produk
@@ -17,18 +18,26 @@ $produkUnggulan = $stmt->fetchAll();
 function rupiah($angka) {
     return 'Rp ' . number_format((float) $angka, 0, ',', '.');
 }
+
+// Gambar utama beranda menggunakan file Toko.jpg
+$gambarHero = '/bloom-petal/uploads/produk/Toko.jpg';
 ?>
 
+<!-- Hero Section -->
 <section class="hero">
     <div class="container hero-content">
+
         <div>
             <span class="eyebrow">Flowers for every moment</span>
+
             <h1>Setiap bunga punya cerita.</h1>
+
             <p>
                 Temukan rangkaian bunga pilihan untuk menyampaikan
                 perasaan, merayakan momen spesial, dan menghadirkan
                 keindahan dalam keseharian.
             </p>
+
             <a href="/bloom-petal/produk.php" class="btn">
                 Jelajahi Koleksi
             </a>
@@ -37,49 +46,69 @@ function rupiah($angka) {
         <div>
             <img
                 class="hero-image"
-                src="https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=900&q=85"
-                alt="Rangkaian bunga berwarna lembut"
+                src="<?= htmlspecialchars($gambarHero) ?>"
+                alt="Bloom & Petal"
             >
         </div>
+
     </div>
 </section>
 
+<!-- Produk Unggulan -->
 <section class="section">
     <div class="container">
+
         <div class="section-heading">
             <span class="eyebrow">Our collection</span>
+
             <h2>Bunga Pilihan</h2>
+
             <p class="section-description">
                 Pilihan bunga untuk momen yang berarti.
             </p>
         </div>
 
         <?php if (empty($produkUnggulan)): ?>
+
             <div class="empty-state">
                 Belum ada produk yang tersedia.
             </div>
+
         <?php else: ?>
+
             <div class="product-grid">
+
                 <?php foreach ($produkUnggulan as $produk): ?>
+
                     <article class="product-card">
+
                         <?php if (!empty($produk['gambar'])): ?>
+
                             <img
-                                src="/bloom-petal/uploads/produk/<?= htmlspecialchars($produk['gambar']) ?>"
+                                src="/bloom-petal/uploads/produk/<?= htmlspecialchars(basename($produk['gambar'])) ?>"
                                 alt="<?= htmlspecialchars($produk['nama']) ?>"
+                                loading="lazy"
                             >
+
                         <?php else: ?>
+
                             <img
-                                src="https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=700&q=80"
+                                src="/bloom-petal/uploads/produk/Toko.jpg"
                                 alt="Bunga Bloom & Petal"
+                                loading="lazy"
                             >
+
                         <?php endif; ?>
 
                         <div class="product-info">
+
                             <span class="category">
                                 <?= htmlspecialchars($produk['kategori']) ?>
                             </span>
 
-                            <h3><?= htmlspecialchars($produk['nama']) ?></h3>
+                            <h3>
+                                <?= htmlspecialchars($produk['nama']) ?>
+                            </h3>
 
                             <p class="price">
                                 <?= rupiah($produk['harga']) ?>
@@ -91,17 +120,26 @@ function rupiah($angka) {
                             >
                                 Lihat Detail
                             </a>
+
                         </div>
+
                     </article>
+
                 <?php endforeach; ?>
+
             </div>
+
         <?php endif; ?>
 
         <div style="text-align:center">
-            <a href="/bloom-petal/produk.php" class="btn btn-secondary">
+            <a
+                href="/bloom-petal/produk.php"
+                class="btn btn-secondary"
+            >
                 Lihat Semua Produk
             </a>
         </div>
+
     </div>
 </section>
 
